@@ -43,7 +43,7 @@ public class LocationService extends Service {
                 super.onLocationResult(locationResult);
                 if (locationResult != null) {
                     Location location = locationResult.getLastLocation();
-                    String value = new StringBuilder(""+location.getLatitude()).append("/")
+                    String value = new StringBuilder(""+location.getLatitude()).append("--")
                                                     .append(location.getLongitude())
                                                     .toString();
                     try {
@@ -61,6 +61,11 @@ public class LocationService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         requestLocation();
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public boolean stopService(Intent name) {
+        return super.stopService(name);
     }
 
     private void requestLocation() {

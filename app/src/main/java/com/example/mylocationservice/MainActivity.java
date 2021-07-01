@@ -52,14 +52,14 @@ public class MainActivity extends AppCompatActivity {
         show = findViewById(R.id.show);
 
         // request location permission.
-        requestPermision();
-
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 23) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 if (!locationManager.isLocationEnabled()) {
                     buildAlertMessageNoLocation();
-                }
+                }else
+                    requestPermision();
+                startService();
             }
         } else {
             startService();
@@ -69,10 +69,13 @@ public class MainActivity extends AppCompatActivity {
     private void requestPermision() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},
                     LOCATION_REQUEST_CODE);
+            startService();
         } else {
             locationPermission = true;
         }
@@ -84,7 +87,8 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case LOCATION_REQUEST_CODE: {
                 if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                     //if permission granted.
                     locationPermission = true;
                     startService();
@@ -113,6 +117,20 @@ public class MainActivity extends AppCompatActivity {
 
     void startService(){
         startService(new Intent(this, LocationService.class));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopService(new Intent(this,LocationService.class));
+//        Toast.makeText(instance, "Destroy Services", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopService(new Intent(this,LocationService.class));
+//        Toast.makeText(instance, "Stop Services", Toast.LENGTH_LONG).show();
     }
 
     public void showLocation(String value){
